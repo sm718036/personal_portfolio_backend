@@ -54,7 +54,7 @@ jobs:
 
       - name: Upload deployable backend
         if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: portfolio-backend-${{ github.sha }}
           path: |
