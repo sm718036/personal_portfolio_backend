@@ -14,12 +14,14 @@ const schema = z.object({
     .default("false")
     .transform((value) => value === "true"),
   UPLOAD_DIR: z.string().min(1).default("uploads"),
+  BLOB_READ_WRITE_TOKEN: z.string().min(1).optional(),
 });
 
 const parsed = schema.parse(process.env);
 
 export const env = {
   ...parsed,
+  isVercel: process.env.VERCEL === "1",
   allowedOrigins: [
     ...new Set([
       parsed.FRONTEND_URL,

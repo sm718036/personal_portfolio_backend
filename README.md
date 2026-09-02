@@ -61,6 +61,9 @@ Health endpoints:
 - Serve the API over HTTPS and restrict platform environment-variable access.
 - Configure automated PostgreSQL backups with the database provider.
 
-Uploads are stored on disk. On a long-running VM, set `UPLOAD_DIR` to a backed-up persistent volume. Ephemeral/serverless deployments require an object-storage adapter such as S3 or Cloudinary before relying on uploaded files in production.
+On Vercel, connect a public Vercel Blob store to the project so Vercel provides
+`BLOB_READ_WRITE_TOKEN`; uploaded portfolio images and CVs are then persisted in Blob storage.
+Vercel uploads are limited to 4 MB to stay below the platform's 4.5 MB function request limit.
+Outside Vercel, uploads use `UPLOAD_DIR`; point it at a backed-up persistent volume in production.
 
 For the most reliable cookie behavior, deploy the frontend and API on the same site, for example `www.example.com` and `api.example.com`. Cross-site cookies may be blocked by browser privacy settings even when CORS is configured correctly.

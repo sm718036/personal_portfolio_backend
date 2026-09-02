@@ -29,16 +29,18 @@ app.use(
 );
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
-app.use(
-  "/uploads",
-  express.static(uploadDirectory, {
-    dotfiles: "deny",
-    fallthrough: false,
-    immutable: true,
-    maxAge: "1y",
-    setHeaders: (response) => response.setHeader("X-Content-Type-Options", "nosniff"),
-  }),
-);
+if (uploadDirectory) {
+  app.use(
+    "/uploads",
+    express.static(uploadDirectory, {
+      dotfiles: "deny",
+      fallthrough: false,
+      immutable: true,
+      maxAge: "1y",
+      setHeaders: (response) => response.setHeader("X-Content-Type-Options", "nosniff"),
+    }),
+  );
+}
 app.use("/api", apiRouter);
 app.use((_request, response) => response.status(404).json({ message: "Route not found" }));
 app.use(errorHandler);

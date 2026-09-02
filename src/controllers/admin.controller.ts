@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 import { prisma } from "../config/database.js";
-import { env } from "../config/env.js";
+import { storeUpload } from "../config/storage.js";
 import { createResource, deleteResource, updateResource } from "../services/admin.service.js";
 import { HttpError } from "../utils/http-error.js";
 import { parseResourceName, settingsSchema } from "../validation/admin.schemas.js";
@@ -56,7 +56,11 @@ export const deleteItem: RequestHandler = async (request, response, next) => {
   }
 };
 
-export const uploadFile: RequestHandler = (request, response, next) => {
-  if (!request.file) return next(new HttpError(400, "Select a supported image or PDF"));
-  response.status(201).json({ url: `${env.PUBLIC_API_URL}/uploads/${request.file.filename}` });
+export const uploadFile: RequestHandler = async (request, response, next) => {
+  try {
+    if (!request.file) throw new HttpError(400, "Select a supported image or PDF");
+    response.status(201).json({ url: await storeUpload(request.file) });
+  } catch (error) {
+    next(error);
+  }
 };

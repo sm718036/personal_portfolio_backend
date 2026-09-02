@@ -11,16 +11,21 @@ const extensionsByMimeType = new Map([
   ["application/pdf", ".pdf"],
 ]);
 
+const storage = uploadDirectory
+  ? multer.diskStorage({
+      destination: uploadDirectory,
+      filename: (_request, file, callback) => {
+        const extension = extensionsByMimeType.get(file.mimetype);
+        if (!extension) return callback(new HttpError(400, "Unsupported file type"), "");
+        callback(null, `${Date.now()}-${crypto.randomUUID()}${extension}`);
+      },
+    })
+  : multer.memoryStorage();
+
 export const upload = multer({
-  storage: multer.diskStorage({
-    destination: uploadDirectory,
-    filename: (_request, file, callback) => {
-      const extension = extensionsByMimeType.get(file.mimetype);
-      if (!extension) return callback(new HttpError(400, "Unsupported file type"), "");
-      callback(null, `${Date.now()}-${crypto.randomUUID()}${extension}`);
-    },
-  }),
-  limits: { fileSize: 8 * 1024 * 1024 },
+  storage,
+  // Vercel Functions reject request bodies above 4.5 MB, including multipart overhead.
+  limits: { fileSize: uploadDirectory ? 8 * 1024 * 1024 : 4 * 1024 * 1024 },
   fileFilter: (_request, file, callback) => {
     if (!extensionsByMimeType.has(file.mimetype))
       return callback(new HttpError(400, "Unsupported file type"));
