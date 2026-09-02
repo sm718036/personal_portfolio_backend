@@ -49,7 +49,7 @@
     "prisma": "6.12.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.11"
   },
   "lint-staged": {
     "*.{js,ts,json,md,yml,yaml}": "prettier --write",
