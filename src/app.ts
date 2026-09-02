@@ -1,6 +1,7 @@
-import express from "express";
+import express, { type RequestHandler } from "express";
 import cors from "cors";
 import * as helmet from "helmet";
+import type { HelmetOptions } from "helmet";
 import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
 import { apiRouter } from "./routes/index.js";
@@ -11,7 +12,10 @@ import { uploadDirectory } from "./config/storage.js";
 export const app = express();
 app.disable("x-powered-by");
 app.set("trust proxy", env.TRUST_PROXY ? 1 : false);
-app.use(helmet.default({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+// Helmet 8 exposes separate ESM/CJS declarations; this explicit boundary keeps
+// Linux deployment compilers from treating the ESM default as a namespace.
+const helmetMiddleware = helmet.default as unknown as (options?: HelmetOptions) => RequestHandler;
+app.use(helmetMiddleware({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(
   cors({
     origin(origin, callback) {
