@@ -44,3 +44,5 @@ if (uploadDirectory) {
 app.use("/api", apiRouter);
 app.use((_request, response) => response.status(404).json({ message: "Route not found" }));
 app.use(errorHandler);
+
+export default app;
