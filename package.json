@@ -6,25 +6,29 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
-    "lint": "eslint src prisma --ext .ts",
+    "start": "node dist/src/index.js",
+    "lint": "tsc --noEmit",
     "test": "vitest run",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "format": "prettier --write \"src/**/*.ts\" \"prisma/**/*.ts\" \"*.{json,md,yml,yaml}\" && prisma format",
+    "format:check": "prettier --check \"src/**/*.ts\" \"prisma/**/*.ts\" \"*.{json,md,yml,yaml}\" && prisma format --check",
+    "validate": "npm run format:check && npm run lint && npm test && npm run build",
+    "prepare": "husky"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "6.14.0",
+    "@prisma/client": "6.12.0",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
-    "effect": "^3.22.1",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
@@ -38,10 +42,17 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^22.18.0",
-    "prisma": "6.14.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.1",
+    "prettier": "^3.6.2",
+    "prisma": "6.12.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
+  },
+  "lint-staged": {
+    "*.{js,ts,json,md,yml,yaml}": "prettier --write",
+    "prisma/schema.prisma": "prisma format"
   },
   "allowScripts": {
     "esbuild": true,

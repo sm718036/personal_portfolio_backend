@@ -1,31 +1,45 @@
 import { prisma } from "../config/database.js";
+import { HttpError } from "../utils/http-error.js";
 
-const visibleOrder = { where: { isVisible: true }, orderBy: { sortOrder: "asc" as const } };
+const byOrder = { sortOrder: "asc" as const };
 
-export async function getPublicPortfolio() {
-  const [settings, socialLinks, skillCategories, experiences, projectCategories, projects, certifications, education] = await Promise.all([
+export async function getPortfolio(includeHidden = false) {
+  const visibility = includeHidden ? undefined : { isVisible: true };
+  const [
+    settings,
+    socialLinks,
+    skillCategories,
+    experiences,
+    projectCategories,
+    projects,
+    certifications,
+    education,
+  ] = await Promise.all([
     prisma.siteSettings.findUnique({ where: { id: "main" } }),
-    prisma.socialLink.findMany(visibleOrder),
-    prisma.skillCategory.findMany(visibleOrder),
-    prisma.experience.findMany(visibleOrder),
-    prisma.projectCategory.findMany(visibleOrder),
-    prisma.project.findMany({ ...visibleOrder, include: { category: true } }),
-    prisma.certification.findMany(visibleOrder),
-    prisma.education.findMany(visibleOrder),
+    prisma.socialLink.findMany({ where: visibility, orderBy: byOrder }),
+    prisma.skillCategory.findMany({ where: visibility, orderBy: byOrder }),
+    prisma.experience.findMany({ where: visibility, orderBy: byOrder }),
+    prisma.projectCategory.findMany({ where: visibility, orderBy: byOrder }),
+    prisma.project.findMany({
+      where: includeHidden ? undefined : { isVisible: true, category: { isVisible: true } },
+      orderBy: byOrder,
+    }),
+    prisma.certification.findMany({ where: visibility, orderBy: byOrder }),
+    prisma.education.findMany({ where: visibility, orderBy: byOrder }),
   ]);
-  return { settings, socialLinks, skillCategories, experiences, projectCategories, projects, certifications, education };
+
+  if (!settings) throw new HttpError(503, "Portfolio content has not been initialized");
+  return {
+    settings,
+    socialLinks,
+    skillCategories,
+    experiences,
+    projectCategories,
+    projects,
+    certifications,
+    education,
+  };
 }
 
-export async function getAdminPortfolio() {
-  const data = await getPublicPortfolio();
-  const [socialLinks, skillCategories, experiences, projectCategories, projects, certifications, education] = await Promise.all([
-    prisma.socialLink.findMany({ orderBy: { sortOrder: "asc" } }),
-    prisma.skillCategory.findMany({ orderBy: { sortOrder: "asc" } }),
-    prisma.experience.findMany({ orderBy: { sortOrder: "asc" } }),
-    prisma.projectCategory.findMany({ orderBy: { sortOrder: "asc" } }),
-    prisma.project.findMany({ orderBy: { sortOrder: "asc" }, include: { category: true } }),
-    prisma.certification.findMany({ orderBy: { sortOrder: "asc" } }),
-    prisma.education.findMany({ orderBy: { sortOrder: "asc" } }),
-  ]);
-  return { ...data, socialLinks, skillCategories, experiences, projectCategories, projects, certifications, education };
-}
+export const getPublicPortfolio = () => getPortfolio(false);
+export const getAdminPortfolio = () => getPortfolio(true);
