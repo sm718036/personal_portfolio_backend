@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import helmet from "helmet";
+import * as helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
 import { apiRouter } from "./routes/index.js";
@@ -11,7 +11,7 @@ import { uploadDirectory } from "./config/storage.js";
 export const app = express();
 app.disable("x-powered-by");
 app.set("trust proxy", env.TRUST_PROXY ? 1 : false);
-app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+app.use(helmet.default({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(
   cors({
     origin(origin, callback) {
