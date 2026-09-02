@@ -25,7 +25,7 @@ For Neon, use the direct connection string for migration commands. A pooled URL 
 
 ```powershell
 npm run dev          # development server with watch mode
-npm run build        # compile TypeScript
+npm run build        # regenerate Prisma Client and compile TypeScript
 npm start            # run compiled production API
 npm run lint         # strict TypeScript verification
 npm test             # validation tests
